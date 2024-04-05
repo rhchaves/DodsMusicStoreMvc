@@ -51,6 +51,52 @@ namespace DmStore.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Client",
+                columns: table => new
+                {
+                    Id = table.Column<string>(type: "NVARCHAR2(450)", nullable: false),
+                    Name = table.Column<string>(type: "NVARCHAR2(200)", maxLength: 200, nullable: false),
+                    NormalizedName = table.Column<string>(type: "NVARCHAR2(200)", maxLength: 200, nullable: true),
+                    Cpf = table.Column<string>(type: "NVARCHAR2(11)", maxLength: 11, nullable: false),
+                    PhoneNumber = table.Column<string>(type: "NVARCHAR2(11)", maxLength: 11, nullable: false),
+                    PublicPlace = table.Column<string>(type: "NVARCHAR2(200)", maxLength: 200, nullable: false),
+                    Number = table.Column<string>(type: "NVARCHAR2(10)", maxLength: 10, nullable: false),
+                    Complement = table.Column<string>(type: "NVARCHAR2(2000)", nullable: true),
+                    ZipCode = table.Column<string>(type: "NVARCHAR2(8)", maxLength: 8, nullable: false),
+                    Neighborhood = table.Column<string>(type: "NVARCHAR2(100)", maxLength: 100, nullable: false),
+                    City = table.Column<string>(type: "NVARCHAR2(100)", maxLength: 100, nullable: false),
+                    State = table.Column<string>(type: "NVARCHAR2(2)", maxLength: 2, nullable: false),
+                    Active = table.Column<bool>(type: "NUMBER(1)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Client", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Supplier",
+                columns: table => new
+                {
+                    Id = table.Column<string>(type: "NVARCHAR2(450)", nullable: false),
+                    Name = table.Column<string>(type: "NVARCHAR2(200)", maxLength: 200, nullable: false),
+                    Cnpj = table.Column<string>(type: "NVARCHAR2(14)", maxLength: 14, nullable: false),
+                    PublicPlace = table.Column<string>(type: "NVARCHAR2(200)", maxLength: 200, nullable: false),
+                    Number = table.Column<string>(type: "NVARCHAR2(10)", maxLength: 10, nullable: false),
+                    Complement = table.Column<string>(type: "NVARCHAR2(2000)", nullable: true),
+                    ZipCode = table.Column<string>(type: "NVARCHAR2(8)", maxLength: 8, nullable: false),
+                    Neighborhood = table.Column<string>(type: "NVARCHAR2(100)", maxLength: 100, nullable: false),
+                    City = table.Column<string>(type: "NVARCHAR2(100)", maxLength: 100, nullable: false),
+                    State = table.Column<string>(type: "NVARCHAR2(2)", maxLength: 2, nullable: false),
+                    DateRegister = table.Column<DateTime>(type: "TIMESTAMP(7)", nullable: false),
+                    DateUpload = table.Column<DateTime>(type: "TIMESTAMP(7)", nullable: false),
+                    Active = table.Column<bool>(type: "NUMBER(1)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Supplier", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "AspNetRoleClaims",
                 columns: table => new
                 {
@@ -156,6 +202,31 @@ namespace DmStore.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
+            migrationBuilder.CreateTable(
+                name: "Product",
+                columns: table => new
+                {
+                    Id = table.Column<string>(type: "NVARCHAR2(450)", nullable: false),
+                    SupplierId = table.Column<string>(type: "NVARCHAR2(450)", nullable: false),
+                    Name = table.Column<string>(type: "NVARCHAR2(2000)", nullable: false),
+                    Description = table.Column<string>(type: "NVARCHAR2(2000)", nullable: true),
+                    Image = table.Column<string>(type: "NVARCHAR2(2000)", nullable: true),
+                    Price = table.Column<decimal>(type: "DECIMAL(18, 2)", nullable: false),
+                    DateRegister = table.Column<DateTime>(type: "TIMESTAMP(7)", nullable: false),
+                    DateUpload = table.Column<DateTime>(type: "TIMESTAMP(7)", nullable: false),
+                    Active = table.Column<bool>(type: "NUMBER(1)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Product", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Product_Supplier_SupplierId",
+                        column: x => x.SupplierId,
+                        principalTable: "Supplier",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
             migrationBuilder.CreateIndex(
                 name: "IX_AspNetRoleClaims_RoleId",
                 table: "AspNetRoleClaims",
@@ -194,6 +265,11 @@ namespace DmStore.Migrations
                 column: "NormalizedUserName",
                 unique: true,
                 filter: "\"NormalizedUserName\" IS NOT NULL");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Product_SupplierId",
+                table: "Product",
+                column: "SupplierId");
         }
 
         /// <inheritdoc />
@@ -215,10 +291,19 @@ namespace DmStore.Migrations
                 name: "AspNetUserTokens");
 
             migrationBuilder.DropTable(
+                name: "Client");
+
+            migrationBuilder.DropTable(
+                name: "Product");
+
+            migrationBuilder.DropTable(
                 name: "AspNetRoles");
 
             migrationBuilder.DropTable(
                 name: "AspNetUsers");
+
+            migrationBuilder.DropTable(
+                name: "Supplier");
         }
     }
 }

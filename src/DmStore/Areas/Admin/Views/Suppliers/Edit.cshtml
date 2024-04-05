@@ -1,0 +1,90 @@
+﻿@model Supplier
+
+@{
+    ViewData["Title"] = "Editar Fornecedor";
+}
+
+<h1>@ViewData["Title"]</h1>
+
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form asp-action="Edit">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="form-group m-3">
+                <label asp-for="Name" class="control-label"></label>
+                <input asp-for="Name" class="form-control" />
+                <span asp-validation-for="Name" class="text-danger"></span>
+            </div>
+            <div class="form-group m-3">
+                <label asp-for="Cnpj" class="control-label"></label>
+                <input asp-for="Cnpj" class="form-control" />
+                <span asp-validation-for="Cnpj" class="text-danger"></span>
+            </div>
+            <div class="form-group m-3">
+                <label asp-for="PublicPlace" class="control-label"></label>
+                <input asp-for="PublicPlace" class="form-control" />
+                <span asp-validation-for="PublicPlace" class="text-danger"></span>
+            </div>
+            <div class="form-group m-3">
+                <label asp-for="Number" class="control-label"></label>
+                <input asp-for="Number" class="form-control" />
+                <span asp-validation-for="Number" class="text-danger"></span>
+            </div>
+            <div class="form-group m-3">
+                <label asp-for="Complement" class="control-label"></label>
+                <input asp-for="Complement" class="form-control" />
+                <span asp-validation-for="Complement" class="text-danger"></span>
+            </div>
+            <div class="form-group m-3">
+                <label asp-for="ZipCode" class="control-label"></label>
+                <input asp-for="ZipCode" class="form-control" />
+                <span asp-validation-for="ZipCode" class="text-danger"></span>
+            </div>
+            <div class="form-group m-3">
+                <label asp-for="Neighborhood" class="control-label"></label>
+                <input asp-for="Neighborhood" class="form-control" />
+                <span asp-validation-for="Neighborhood" class="text-danger"></span>
+            </div>
+            <div class="form-group m-3">
+                <label asp-for="City" class="control-label"></label>
+                <input asp-for="City" class="form-control" />
+                <span asp-validation-for="City" class="text-danger"></span>
+            </div>
+            <div class="form-group m-3">
+                <label asp-for="State" class="control-label"></label>
+                <input asp-for="State" class="form-control" />
+                <span asp-validation-for="State" class="text-danger"></span>
+            </div>
+            <div class="form-group m-3">
+                <label asp-for="Active" class="control-label"></label>
+                <select asp-for="Active" id="active" class="form-control fw-bold @(Model.Active ? "text-success" : "text-danger")" onchange="changeColor(this)">
+                    <option value="true" class="text-success fw-bold">Ativo</option>
+                    <option value="false" class="text-danger fw-bold">Desativado</option>
+                </select>
+            </div>
+            <input type="hidden" asp-for="Id" />
+            <div class="form-group m-3">
+                <input class="btn btn-primary m-3" type="submit" value="Salvar" />
+                <a class="btn btn-primary m-3" asp-action="Index">Voltar</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}
+
+<script language="javascript">
+    function changeColor(selectElement) {
+        var isActive = selectElement.value === "true";
+        if (isActive) {
+            selectElement.classList.remove("text-danger");
+            selectElement.classList.add("text-success");
+        } else {
+            selectElement.classList.remove("text-success");
+            selectElement.classList.add("text-danger");
+        }
+    }
+</script>
