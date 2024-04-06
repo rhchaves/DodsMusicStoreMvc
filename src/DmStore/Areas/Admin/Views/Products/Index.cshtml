@@ -43,14 +43,8 @@
                 @Html.DisplayFor(modelItem => item.Price)
             </td>
             <td>
-                @if (item.Active)
-                {
-                    <span class="text-success fw-bold">Ativo</span>
-                }
-                else
-                {
-                    <span class="text-danger fw-bold">Inativo</span>
-                }
+                <a asp-action="ActivateDeactivate" asp-route-id="@item.Id" class="btn btn-clean btn-sm fw-bold @(item.Active ? "text-success" : "text-danger")">
+                    @(item.Active ? "Ativo" : "Inativo")</a>
             </td>
             <td>
                 @Html.DisplayFor(modelItem => item.Supplier.Name)

@@ -24,12 +24,10 @@ namespace DmStore.Areas.Admin.Controllers
         [Route("detalhes/{id}")]
         public async Task<IActionResult> Details(string id)
         {
-            var supplier = await _context.Supplier
-                .FirstOrDefaultAsync(m => m.Id == id);
-            if (supplier == null)
-            {
+            if (!SupplierExists(id))
                 return NotFound();
-            }
+
+            var supplier = await _context.Supplier.FirstOrDefaultAsync(m => m.Id == id);
 
             return View(supplier);
         }
@@ -59,11 +57,11 @@ namespace DmStore.Areas.Admin.Controllers
         [Route("editar/{id}")]
         public async Task<IActionResult> Edit(string id)
         {
-            var supplier = await _context.Supplier.FindAsync(id);
-            if (supplier == null)
-            {
+            if (!SupplierExists(id))
                 return NotFound();
-            }
+
+            Supplier supplier = await _context.Supplier.FindAsync(id);
+            
             return View(supplier);
         }
 
@@ -71,10 +69,8 @@ namespace DmStore.Areas.Admin.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(string id, [Bind("Name,Cnpj,PublicPlace,Number,Complement,ZipCode,Neighborhood,City,State,Active,Id")] Supplier supplier)
         {
-            if (id != supplier.Id)
-            {
+            if (id != supplier.Id || !SupplierExists(id))
                 return NotFound();
-            }
 
             Supplier supplierUpdate = await _context.Supplier.FindAsync(id);
             if (ModelState.IsValid)
@@ -98,16 +94,9 @@ namespace DmStore.Areas.Admin.Controllers
                         await _context.SaveChangesAsync();
                     }
                 }
-                catch (DbUpdateConcurrencyException)
+                catch (DbUpdateConcurrencyException ex)
                 {
-                    if (!SupplierExists(supplier.Id))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
+                    throw new Exception(ex.Message);
                 }
                 return RedirectToAction(nameof(Index));
             }
@@ -117,12 +106,10 @@ namespace DmStore.Areas.Admin.Controllers
         [Route("excluir/{id}")]
         public async Task<IActionResult> Delete(string id)
         {
-            var supplier = await _context.Supplier
-                .FirstOrDefaultAsync(m => m.Id == id);
-            if (supplier == null)
-            {
+            if (!SupplierExists(id))
                 return NotFound();
-            }
+
+            var supplier = await _context.Supplier.FirstOrDefaultAsync(m => m.Id == id);
 
             return View(supplier);
         }
@@ -131,13 +118,37 @@ namespace DmStore.Areas.Admin.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(string id)
         {
-            var supplier = await _context.Supplier.FindAsync(id);
-            if (supplier != null)
-            {
-                _context.Supplier.Remove(supplier);
-            }
+            if (!SupplierExists(id))
+                return NotFound();
 
+            _context.Supplier.Remove(await _context.Supplier.FindAsync(id));
             await _context.SaveChangesAsync();
+            return RedirectToAction(nameof(Index));
+        }
+
+        [Route("status/{id}")]
+        public async Task<IActionResult> ActivateDeactivate(string id)
+        {
+            if (!SupplierExists(id))
+                return NotFound();
+
+            Supplier supplier = await _context.Supplier.FindAsync(id);
+
+            try
+            {
+                if (supplier != null)
+                {
+                    supplier.Active = !supplier.Active;
+                    supplier.DateUpload = DateTime.Now;
+
+                    _context.Update(supplier);
+                    await _context.SaveChangesAsync();
+                }
+            }
+            catch (DbUpdateConcurrencyException ex)
+            {
+                throw new Exception(ex.Message);
+            }
             return RedirectToAction(nameof(Index));
         }
 

@@ -26,13 +26,10 @@ namespace DmStore.Areas.Admin.Controllers
         [Route("detalhes/{id}")]
         public async Task<IActionResult> Details(string id)
         {
-            var product = await _context.Product
-                .Include(p => p.Supplier)
-                .FirstOrDefaultAsync(m => m.Id == id);
-            if (product == null)
-            {
+            if (!ProductExists(id))
                 return NotFound();
-            }
+
+            var product = await _context.Product.Include(p => p.Supplier).FirstOrDefaultAsync(m => m.Id == id);
 
             return View(product);
         }
@@ -59,30 +56,26 @@ namespace DmStore.Areas.Admin.Controllers
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["Supplier"] = new SelectList(_context.Supplier, "Id", "Id", product.SupplierId);
             return View(product);
         }
 
         [Route("editar/{id}")]
         public async Task<IActionResult> Edit(string id)
         {
-            var product = await _context.Product.FindAsync(id);
-            if (product == null)
-            {
+            if (!ProductExists(id))
                 return NotFound();
-            }
-            ViewData["SupplierId"] = new SelectList(_context.Supplier, "Id", "Id", product.SupplierId);
+
+            Product product = await _context.Product.Include(s => s.Supplier).FirstOrDefaultAsync(p => p.Id == id);
+
             return View(product);
         }
 
         [HttpPost("editar/{id}")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(string id, [Bind("Name,Description,Image,Price,Active,Id")] Product product)
+        public async Task<IActionResult> Edit(string id, [Bind("Name,Description,Image,Price,Active,Id,SupplierId")] Product product)
         {
-            if (id != product.Id)
-            {
+            if (id != product.Id || !ProductExists(id))
                 return NotFound();
-            }
 
             Product productUpdate = await _context.Product.FindAsync(id);
             if (ModelState.IsValid)
@@ -102,33 +95,22 @@ namespace DmStore.Areas.Admin.Controllers
                         await _context.SaveChangesAsync();
                     }
                 }
-                catch (DbUpdateConcurrencyException)
+                catch (DbUpdateConcurrencyException ex)
                 {
-                    if (!ProductExists(product.Id))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
+                    throw new Exception(ex.Message);
                 }
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["SupplierId"] = new SelectList(_context.Supplier, "Id", "Id", product.SupplierId);
             return View(productUpdate);
         }
 
         [Route("excluir/{id}")]
         public async Task<IActionResult> Delete(string id)
         {
-            var product = await _context.Product
-                .Include(p => p.Supplier)
-                .FirstOrDefaultAsync(m => m.Id == id);
-            if (product == null)
-            {
+            if (!ProductExists(id))
                 return NotFound();
-            }
+
+            var product = await _context.Product.Include(p => p.Supplier).FirstOrDefaultAsync(m => m.Id == id);
 
             return View(product);
         }
@@ -137,13 +119,37 @@ namespace DmStore.Areas.Admin.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(string id)
         {
-            var product = await _context.Product.FindAsync(id);
-            if (product != null)
-            {
-                _context.Product.Remove(product);
-            }
+            if (!ProductExists(id))
+                return NotFound();
 
+            _context.Product.Remove(await _context.Product.FindAsync(id));
             await _context.SaveChangesAsync();
+            return RedirectToAction(nameof(Index));
+        }
+
+        [Route("status/{id}")]
+        public async Task<IActionResult> ActivateDeactivate(string id)
+        {
+            if (!ProductExists(id))
+                return NotFound();
+
+            Product product = await _context.Product.FindAsync(id);
+
+            try
+            {
+                if (product != null)
+                {
+                    product.Active = !product.Active;
+                    product.DateUpload = DateTime.Now;
+
+                    _context.Update(product);
+                    await _context.SaveChangesAsync();
+                }
+            }
+            catch (DbUpdateConcurrencyException ex)
+            {
+                throw new Exception(ex.Message);
+            }
             return RedirectToAction(nameof(Index));
         }
 

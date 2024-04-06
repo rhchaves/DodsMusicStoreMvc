@@ -52,22 +52,20 @@ namespace DmStore.Areas.Admin.Controllers
         [Route("editar/{id}")]
         public async Task<IActionResult> Edit(string id)
         {
-            var client = await _context.Client.FindAsync(id);
-            if (client == null)
-            {
+            if (!ClientExists(id))
                 return NotFound();
-            }
-            return View();
+
+            var client = await _context.Client.FindAsync(id);
+
+            return View(client);
         }
 
         [HttpPost("editar/{id}")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(string id, [Bind("Name,Cpf,Active,Id")] Client client)
+        public async Task<IActionResult> Edit(string id, [Bind("Id,Name,Cpf,PhoneNumber,PublicPlace,Number,Complement,ZipCode,Neighborhood,City,State,NormalizedName")] Client client)
         {
-            if (id != client.Id)
-            {
+            if (id != client.Id || !ClientExists(client.Id))
                 return NotFound();
-            }
 
             if (ModelState.IsValid)
             {
@@ -76,16 +74,9 @@ namespace DmStore.Areas.Admin.Controllers
                     _context.Update(client);
                     await _context.SaveChangesAsync();
                 }
-                catch (DbUpdateConcurrencyException)
+                catch (DbUpdateConcurrencyException ex)
                 {
-                    if (!ClientExists(client.Id))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
+                    throw new Exception(ex.Message);
                 }
                 return RedirectToAction("Index", "Home");
             }
