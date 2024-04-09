@@ -7,12 +7,10 @@ namespace DmStore.Data
 {
     public class DmStoreDbContext : IdentityDbContext
     {
-        public DmStoreDbContext(DbContextOptions<DmStoreDbContext> options)
-            : base(options)
-        {
-        }
-        public DbSet<Client> Client { get; set; }
-        public DbSet<Supplier> Supplier { get; set; }
-        public DbSet<Product> Product { get; set; }
+        public DmStoreDbContext(DbContextOptions<DmStoreDbContext> options) : base(options)
+        { }
+        public DbSet<Client> CLIENTS { get; set; }
+        public DbSet<Supplier> SUPPLIERS { get; set; }
+        public DbSet<Product> PRODUCTS { get; set; }
     }
 }

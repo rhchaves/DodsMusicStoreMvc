@@ -28,8 +28,6 @@
 
   <ItemGroup>
     <Folder Include="Areas\Admin\Services\" />
-    <Folder Include="Data\Migrations\" />
-    <Folder Include="Migrations\" />
   </ItemGroup>
 
 </Project>

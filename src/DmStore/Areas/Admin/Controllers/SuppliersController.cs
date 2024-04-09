@@ -18,7 +18,7 @@ namespace DmStore.Areas.Admin.Controllers
 
         public async Task<IActionResult> Index()
         {
-            return View(await _context.Supplier.ToListAsync());
+            return View(await _context.SUPPLIERS.ToListAsync());
         }
 
         [Route("detalhes/{id}")]
@@ -27,7 +27,7 @@ namespace DmStore.Areas.Admin.Controllers
             if (!SupplierExists(id))
                 return NotFound();
 
-            var supplier = await _context.Supplier.FirstOrDefaultAsync(m => m.Id == id);
+            var supplier = await _context.SUPPLIERS.FirstOrDefaultAsync(m => m.ID == id);
 
             return View(supplier);
         }
@@ -40,13 +40,14 @@ namespace DmStore.Areas.Admin.Controllers
 
         [HttpPost("novo")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Name,Cnpj,PublicPlace,Number,Complement,ZipCode,Neighborhood,City,State,Active,Id")] Supplier supplier)
+        public async Task<IActionResult> Create([Bind("ID,NAME,CNPJ,ADDRESS,ADDRESS_NUMBER,COMPLEMENT,ZIP_CODE,NEIGHBORHOOD,CITY,STATE,STATUS")] Supplier supplier)
         {
             if (ModelState.IsValid)
             {
-                supplier.Id = Guid.NewGuid().ToString();
-                supplier.DateRegister = DateTime.Now;
-                supplier.DateUpload = DateTime.Now;
+                //supplier.Id = Guid.NewGuid().ToString();
+                supplier.CREATE_REGISTER = DateTime.Now;
+                supplier.UPDATE_REGISTER = DateTime.Now;
+                supplier.UPDATE_STATUS = DateTime.Now;
                 _context.Add(supplier);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
@@ -60,35 +61,34 @@ namespace DmStore.Areas.Admin.Controllers
             if (!SupplierExists(id))
                 return NotFound();
 
-            Supplier supplier = await _context.Supplier.FindAsync(id);
+            Supplier supplier = await _context.SUPPLIERS.FindAsync(id);
             
             return View(supplier);
         }
 
         [HttpPost("editar/{id}")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(string id, [Bind("Name,Cnpj,PublicPlace,Number,Complement,ZipCode,Neighborhood,City,State,Active,Id")] Supplier supplier)
+        public async Task<IActionResult> Edit(string id, [Bind("ID,NAME,CNPJ,ADDRESS,ADDRESS_NUMBER,COMPLEMENT,ZIP_CODE,NEIGHBORHOOD,CITY,STATE,STATUS")] Supplier supplier)
         {
-            if (id != supplier.Id || !SupplierExists(id))
+            if (id != supplier.ID || !SupplierExists(id))
                 return NotFound();
 
-            Supplier supplierUpdate = await _context.Supplier.FindAsync(id);
+            Supplier supplierUpdate = await _context.SUPPLIERS.FindAsync(id);
             if (ModelState.IsValid)
             {
                 try
                 {
                     if (supplierUpdate != null)
                     {
-                        supplierUpdate.Name = supplier.Name;
-                        supplierUpdate.PublicPlace = supplier.PublicPlace;
-                        supplierUpdate.Number = supplier.Number;
-                        supplierUpdate.Complement = supplier.Complement;
-                        supplierUpdate.ZipCode = supplier.ZipCode;
-                        supplierUpdate.Neighborhood = supplier.Neighborhood;
-                        supplierUpdate.City = supplier.City;
-                        supplierUpdate.State = supplier.State;
-                        supplierUpdate.Active = supplier.Active;
-                        supplierUpdate.DateUpload = DateTime.Now;
+                        supplierUpdate.NAME = supplier.NAME;
+                        supplierUpdate.ADDRESS = supplier.ADDRESS;
+                        supplierUpdate.ADDRESS_NUMBER = supplier.ADDRESS_NUMBER;
+                        supplierUpdate.COMPLEMENT = supplier.COMPLEMENT;
+                        supplierUpdate.ZIP_CODE = supplier.ZIP_CODE;
+                        supplierUpdate.NEIGHBORHOOD = supplier.NEIGHBORHOOD;
+                        supplierUpdate.CITY = supplier.CITY;
+                        supplierUpdate.STATE = supplier.STATE;
+                        supplierUpdate.UPDATE_REGISTER = DateTime.Now;
 
                         _context.Update(supplierUpdate);
                         await _context.SaveChangesAsync();
@@ -109,7 +109,7 @@ namespace DmStore.Areas.Admin.Controllers
             if (!SupplierExists(id))
                 return NotFound();
 
-            var supplier = await _context.Supplier.FirstOrDefaultAsync(m => m.Id == id);
+            var supplier = await _context.SUPPLIERS.FirstOrDefaultAsync(m => m.ID == id);
 
             return View(supplier);
         }
@@ -121,7 +121,7 @@ namespace DmStore.Areas.Admin.Controllers
             if (!SupplierExists(id))
                 return NotFound();
 
-            _context.Supplier.Remove(await _context.Supplier.FindAsync(id));
+            _context.SUPPLIERS.Remove(await _context.SUPPLIERS.FindAsync(id));
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
@@ -132,14 +132,14 @@ namespace DmStore.Areas.Admin.Controllers
             if (!SupplierExists(id))
                 return NotFound();
 
-            Supplier supplier = await _context.Supplier.FindAsync(id);
+            Supplier supplier = await _context.SUPPLIERS.FindAsync(id);
 
             try
             {
                 if (supplier != null)
                 {
-                    supplier.Active = !supplier.Active;
-                    supplier.DateUpload = DateTime.Now;
+                    supplier.STATUS = !supplier.STATUS;
+                    supplier.UPDATE_STATUS = DateTime.Now;
 
                     _context.Update(supplier);
                     await _context.SaveChangesAsync();
@@ -154,7 +154,7 @@ namespace DmStore.Areas.Admin.Controllers
 
         private bool SupplierExists(string id)
         {
-            return _context.Supplier.Any(e => e.Id == id);
+            return _context.SUPPLIERS.Any(e => e.ID == id);
         }
     }
 }

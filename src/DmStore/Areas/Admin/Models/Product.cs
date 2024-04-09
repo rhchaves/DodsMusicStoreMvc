@@ -1,40 +1,55 @@
 ﻿using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using DmStore.Models;
 
 namespace DmStore.Areas.Admin.Models
 {
     public class Product : Entity
-    {
-        [Required]
-        public string SupplierId { get; set; }
-
+    {      
         [Required]
         [DisplayName("Nome")]
-        public string? Name { get; set; }
+        public string? NAME { get; set; }
 
         [DisplayName("Descrição")]
-        public string? Description { get; set; }
+        public string? DESCRIPTION { get; set; }
 
         [DisplayName("Imagem")]
-        public string? Image { get; set; }
+        public string? IMAGE_URI { get; set; }
 
         [Required]
         [DisplayName("Preço")]
-        public decimal? Price { get; set; }
+        public decimal PRICE { get; set; }
+        
+        [Required]
+        [DisplayName("Qtd Estoque")]
+        public int STOCK_QTD { get; set; }
+
+        [Required]
+        [DisplayName("Qtd Vendida")]
+        public int SOLD_QTD { get; set; }
+
+        [Required]
+        [DisplayName("Status")]
+        public bool STATUS { get; set; }
+
+        [Required]
+        [DisplayName("Atualização do Status")]
+        public DateTime UPDATE_STATUS { get; set; }
 
         [Required]
         [DisplayName("Data de Cadastro")]
-        public DateTime DateRegister { get; set; }
+        public DateTime CREATE_REGISTER { get; set; }
 
         [Required]
-        [DisplayName("Data de Atualização")]
-        public DateTime DateUpload { get; set; }
-
-        [DisplayName("Status")]
-        public bool Active { get; set; }
+        [DisplayName("Atualização do Cadastro")]
+        public DateTime UPDATE_REGISTER { get; set; }
 
         /* EF Relations */
-        public Supplier? Supplier { get; set; }
+        [Required]
+        public string SUPPLIER_ID { get; set; }
+
+        [ForeignKey("SUPPLIER_ID")] // Indica que essa propriedade se refere à chave estrangeira SUPPLIER_ID
+        public Supplier? SUPPLIER { get; set; }
     }
 }

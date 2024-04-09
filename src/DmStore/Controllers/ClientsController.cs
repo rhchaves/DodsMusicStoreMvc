@@ -27,7 +27,7 @@ namespace DmStore.Areas.Admin.Controllers
 
         [HttpPost("completar-cadastro")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Name,Cpf,PhoneNumber,Id,PublicPlace,Number,Complement,ZipCode,Neighborhood,City,State")] Client client)
+        public async Task<IActionResult> Create([Bind("ID,NAME,CPF,PHONE_NUMBER,ADDRESS,ADDRESS_NUMBER,COMPLEMENT,ZIP_CODE,NEIGHBORHOOD,CITY,STATE,NORMALIZED_NAME")] Client client)
         {
             IdentityUser loggedUser = await _context.Users.FindAsync(User.FindFirstValue(ClaimTypes.NameIdentifier));
 
@@ -35,14 +35,14 @@ namespace DmStore.Areas.Admin.Controllers
 
             if (ModelState.IsValid)
             {
-                client.Id = loggedUser.Id;
-                client.NormalizedName = client.Name.ToUpper();
-                client.Active = true;
-                loggedUser.PhoneNumber = client.PhoneNumber;
+                client.ID = loggedUser.Id;
+                client.NORMALIZED_NAME = client.NAME.ToUpper();
+                client.STATUS = true;
+                loggedUser.PhoneNumber = client.PHONE_NUMBER;
                 loggedUser.PhoneNumberConfirmed = true;
 
                 await _userManager.UpdateAsync(loggedUser);
-                _context.Client.Add(client);
+                _context.CLIENTS.Add(client);
                 await _context.SaveChangesAsync();
                 return RedirectToAction("Index", "Home");
             }
@@ -55,16 +55,16 @@ namespace DmStore.Areas.Admin.Controllers
             if (!ClientExists(id))
                 return NotFound();
 
-            var client = await _context.Client.FindAsync(id);
+            var client = await _context.CLIENTS.FindAsync(id);
 
             return View(client);
         }
 
         [HttpPost("editar/{id}")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(string id, [Bind("Id,Name,Cpf,PhoneNumber,PublicPlace,Number,Complement,ZipCode,Neighborhood,City,State,NormalizedName")] Client client)
+        public async Task<IActionResult> Edit(string id, [Bind("ID,NAME,CPF,PHONE_NUMBER,ADDRESS,ADDRESS_NUMBER,COMPLEMENT,ZIP_CODE,NEIGHBORHOOD,CITY,STATE,NORMALIZED_NAME")] Client client)
         {
-            if (id != client.Id || !ClientExists(client.Id))
+            if (id != client.ID || !ClientExists(client.ID))
                 return NotFound();
 
             if (ModelState.IsValid)
@@ -85,7 +85,7 @@ namespace DmStore.Areas.Admin.Controllers
 
         private bool ClientExists(string id)
         {
-            return _context.Client.Any(e => e.Id == id);
+            return _context.CLIENTS.Any(e => e.ID == id);
         }
     }
 }

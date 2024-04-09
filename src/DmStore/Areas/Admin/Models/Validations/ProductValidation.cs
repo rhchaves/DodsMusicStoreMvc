@@ -1,5 +1,4 @@
-﻿using DmStore.Areas.Admin.Models;
-using FluentValidation;
+﻿using FluentValidation;
 
 namespace DmStore.Areas.Admin.Models.Validations
 {
@@ -7,13 +6,12 @@ namespace DmStore.Areas.Admin.Models.Validations
     {
         public ProductValidation()
         {
-            RuleFor(c => c.Name)
+            RuleFor(c => c.NAME)
                 .NotEmpty().WithMessage("O campo {PropertyName} precisa ser fornecido")
                 .Length(2, 200).WithMessage("O campo {PropertyName} precisa ter entre {MinLength} e {MaxLength} caracteres");
 
-            RuleFor(c => c.Price)
+            RuleFor(c => c.PRICE)
                 .GreaterThan(0).WithMessage("O campo {PropertyName} precisa ser maior que {ComparisonValue}");
-
         }
     }
 }

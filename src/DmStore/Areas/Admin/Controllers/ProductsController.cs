@@ -19,8 +19,10 @@ namespace DmStore.Areas.Admin.Controllers
 
         public async Task<IActionResult> Index()
         {
-            var dmStoreDbContext = _context.Product.Include(p => p.Supplier);
+            var dmStoreDbContext = _context.PRODUCTS.Include(p => p.SUPPLIER);
             return View(await dmStoreDbContext.ToListAsync());
+
+            //return View(await _context.PRODUCTS. .ToListAsync());
         }
 
         [Route("detalhes/{id}")]
@@ -29,7 +31,9 @@ namespace DmStore.Areas.Admin.Controllers
             if (!ProductExists(id))
                 return NotFound();
 
-            var product = await _context.Product.Include(p => p.Supplier).FirstOrDefaultAsync(m => m.Id == id);
+            Product product = await _context.PRODUCTS.FindAsync(id);
+            Supplier supplier = await _context.SUPPLIERS.FindAsync(product.SUPPLIER_ID);
+            product.SUPPLIER = supplier;
 
             return View(product);
         }
@@ -37,21 +41,24 @@ namespace DmStore.Areas.Admin.Controllers
         [Route("novo")]
         public IActionResult Create()
         {
-            var activeSuppliers = _context.Supplier.Where(s => s.Active == true).ToList();
+            var activeSuppliers = _context.SUPPLIERS.Where(s => s.STATUS == true);
 
-            ViewData["Supplier"] = new SelectList(activeSuppliers, "Id", "Name");
+            ViewData["Supplier"] = new SelectList(activeSuppliers, "ID", "NAME");
             return View();
         }
 
         [HttpPost("novo")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Name,Description,Image,Price,SupplierId")] Product product)
+        public async Task<IActionResult> Create([Bind("NAME,DESCRIPTION,IMAGE_URI,PRICE,STOCK_QTD,STATUS,SUPPLIER_ID")] Product product)
         {
             if (ModelState.IsValid)
             {
-                product.Id = Guid.NewGuid().ToString();
-                product.DateRegister = DateTime.Now;
-                product.DateUpload = DateTime.Now;
+                Supplier supplier = await _context.SUPPLIERS.FindAsync(product.SUPPLIER_ID);
+
+                product.SUPPLIER = supplier;
+                product.CREATE_REGISTER = DateTime.Now;
+                product.UPDATE_REGISTER = DateTime.Now;
+                product.UPDATE_STATUS = DateTime.Now;
                 _context.Add(product);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
@@ -65,31 +72,33 @@ namespace DmStore.Areas.Admin.Controllers
             if (!ProductExists(id))
                 return NotFound();
 
-            Product product = await _context.Product.Include(s => s.Supplier).FirstOrDefaultAsync(p => p.Id == id);
+            Product product = await _context.PRODUCTS.FindAsync(id);
+            Supplier supplier = await _context.SUPPLIERS.FindAsync(product.SUPPLIER_ID);
+            product.SUPPLIER = supplier;
 
             return View(product);
         }
 
         [HttpPost("editar/{id}")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(string id, [Bind("Name,Description,Image,Price,Active,Id,SupplierId")] Product product)
+        public async Task<IActionResult> Edit(string id, [Bind("ID,NAME,DESCRIPTION,IMAGE_URI,PRICE,STOCK_QTD,STATUS,SUPPLIER_ID")] Product product)
         {
-            if (id != product.Id || !ProductExists(id))
+            if (id != product.ID || !ProductExists(id))
                 return NotFound();
 
-            Product productUpdate = await _context.Product.FindAsync(id);
+            Product productUpdate = await _context.PRODUCTS.FindAsync(id);
             if (ModelState.IsValid)
             {
                 try
                 {
                     if (productUpdate != null)
                     {
-                        productUpdate.Name = product.Name;
-                        productUpdate.Description = product.Description;
-                        productUpdate.Image = product.Image;
-                        productUpdate.Price = product.Price;
-                        productUpdate.Active = product.Active;
-                        productUpdate.DateUpload = DateTime.Now;
+                        productUpdate.NAME = product.NAME;
+                        productUpdate.DESCRIPTION = product.DESCRIPTION;
+                        productUpdate.IMAGE_URI = product.IMAGE_URI;
+                        productUpdate.PRICE = product.PRICE;
+                        productUpdate.STOCK_QTD = product.STOCK_QTD;
+                        productUpdate.UPDATE_REGISTER = DateTime.Now;
 
                         _context.Update(productUpdate);
                         await _context.SaveChangesAsync();
@@ -110,7 +119,9 @@ namespace DmStore.Areas.Admin.Controllers
             if (!ProductExists(id))
                 return NotFound();
 
-            var product = await _context.Product.Include(p => p.Supplier).FirstOrDefaultAsync(m => m.Id == id);
+            Product product = await _context.PRODUCTS.FindAsync(id);
+            Supplier supplier = await _context.SUPPLIERS.FindAsync(product.SUPPLIER_ID);
+            product.SUPPLIER = supplier;
 
             return View(product);
         }
@@ -122,7 +133,7 @@ namespace DmStore.Areas.Admin.Controllers
             if (!ProductExists(id))
                 return NotFound();
 
-            _context.Product.Remove(await _context.Product.FindAsync(id));
+            _context.PRODUCTS.Remove(await _context.PRODUCTS.FindAsync(id));
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
@@ -133,14 +144,14 @@ namespace DmStore.Areas.Admin.Controllers
             if (!ProductExists(id))
                 return NotFound();
 
-            Product product = await _context.Product.FindAsync(id);
+            Product product = await _context.PRODUCTS.FindAsync(id);
 
             try
             {
                 if (product != null)
                 {
-                    product.Active = !product.Active;
-                    product.DateUpload = DateTime.Now;
+                    product.STATUS = !product.STATUS;
+                    product.UPDATE_STATUS = DateTime.Now;
 
                     _context.Update(product);
                     await _context.SaveChangesAsync();
@@ -155,7 +166,7 @@ namespace DmStore.Areas.Admin.Controllers
 
         private bool ProductExists(string id)
         {
-            return _context.Product.Any(e => e.Id == id);
+            return _context.PRODUCTS.Any(e => e.ID == id);
         }
     }
 }

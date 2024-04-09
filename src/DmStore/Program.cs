@@ -10,8 +10,11 @@ using Microsoft.EntityFrameworkCore;
 using System.Reflection;
 
 var builder = WebApplication.CreateBuilder(args);
-
 // Add services to the container.
+
+builder.Services.AddControllersWithViews();
+
+// Configuração do DbContext do Oracle (para as outras entidades)
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
 builder.Services.AddDbContext<DmStoreDbContext>(options =>
         options.UseOracle(connectionString));
@@ -20,16 +23,19 @@ builder.Configuration.AddUserSecrets(Assembly.GetExecutingAssembly(), true);
 
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
+// Configuração do serviço Identity
 builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
-    .AddEntityFrameworkStores<DmStoreDbContext>();
+                .AddEntityFrameworkStores<DmStoreDbContext>()
+                .AddDefaultTokenProviders();
 
+// Registro dos Serviços
 builder.Services.AddScoped<ClientService, ClientService>();
 
+// Registro de Validações
 builder.Services.AddScoped<IValidator<Client>, ClientValidation>()
                 .AddScoped<IValidator<Product>, ProductValidation>()
                 .AddScoped<IValidator<Supplier>, SupplierValidation>();
 
-builder.Services.AddControllersWithViews();
 
 var app = builder.Build();
 

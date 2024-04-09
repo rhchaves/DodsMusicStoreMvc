@@ -13,7 +13,7 @@ namespace DmStore.Services
 
         public async Task<Client> GetClient(string id)
         {
-            var client = await _context.Client.FindAsync(id);
+            var client = await _context.CLIENTS.FindAsync(id);
             return client;
         }
     }

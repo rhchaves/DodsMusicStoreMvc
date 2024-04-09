@@ -4,8 +4,8 @@
     {
         protected Entity()
         {
-            Id = Guid.NewGuid().ToString();
+            ID = Guid.NewGuid().ToString();
         }
-        public string Id { get; set; }
+        public string ID { get; set; }
     }
 }
