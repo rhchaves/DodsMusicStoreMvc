@@ -25,11 +25,28 @@
                 <input asp-for="DESCRIPTION" class="form-control" />
                 <span asp-validation-for="DESCRIPTION" class="text-danger"></span>
             </div>
-            <div class="form-group m-3">
+
+            <div class="form-group">
+                <label>Imagem Atual</label><br />
+                <img src="~/images/@Model.IMAGE_URI" alt="@Model.IMAGE_URI" style="width: 70px; height: 100px" />
+            </div>
+
+            <div class="form-group">
+                <label asp-for="IMAGE_UPLOAD" class="control-label"></label>
+
+                <div class="input-group custom-file-button">
+                    <input type="file" class="form-control" id="ImagemUpload" asp-for="IMAGE_UPLOAD">
+                    <label class="input-group-text" for="ImagemUpload">Escolher</label>
+                </div>
+
+                <span asp-validation-for="IMAGE_UPLOAD" class="text-danger"></span>
+            </div>
+
+            @* <div class="form-group m-3">
                 <label asp-for="IMAGE_URI" class="control-label"></label>
                 <input asp-for="IMAGE_URI" class="form-control" />
                 <span asp-validation-for="IMAGE_URI" class="text-danger"></span>
-            </div>
+            </div> *@
             <div class="form-group m-3">
                 <label asp-for="PRICE" class="control-label"></label>
                 <input asp-for="PRICE" class="form-control" />

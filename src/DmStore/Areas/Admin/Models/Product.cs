@@ -14,8 +14,11 @@ namespace DmStore.Areas.Admin.Models
         [DisplayName("Descrição")]
         public string? DESCRIPTION { get; set; }
 
-        [DisplayName("Imagem")]
         public string? IMAGE_URI { get; set; }
+
+        [NotMapped]
+        [DisplayName("Imagem do Produto")]
+        public IFormFile? IMAGE_UPLOAD { get; set; }
 
         [Required]
         [DisplayName("Preço")]

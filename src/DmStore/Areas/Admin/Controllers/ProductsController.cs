@@ -49,11 +49,18 @@ namespace DmStore.Areas.Admin.Controllers
 
         [HttpPost("novo")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("NAME,DESCRIPTION,IMAGE_URI,PRICE,STOCK_QTD,STATUS,SUPPLIER_ID")] Product product)
+        public async Task<IActionResult> Create([Bind("NAME,DESCRIPTION,IMAGE_UPLOAD,PRICE,STOCK_QTD,STATUS,SUPPLIER_ID")] Product product)
         {
             if (ModelState.IsValid)
             {
                 Supplier supplier = await _context.SUPPLIERS.FindAsync(product.SUPPLIER_ID);
+
+                var imgPrefixo = Guid.NewGuid() + "_";
+                if (!await UploadArquivo(product.IMAGE_UPLOAD, imgPrefixo))
+                {
+                    return View(product);
+                }
+                product.IMAGE_URI = imgPrefixo + product.IMAGE_UPLOAD.FileName;
 
                 product.SUPPLIER = supplier;
                 product.CREATE_REGISTER = DateTime.Now;
@@ -81,7 +88,7 @@ namespace DmStore.Areas.Admin.Controllers
 
         [HttpPost("editar/{id}")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(string id, [Bind("ID,NAME,DESCRIPTION,IMAGE_URI,PRICE,STOCK_QTD,STATUS,SUPPLIER_ID")] Product product)
+        public async Task<IActionResult> Edit(string id, [Bind("ID,NAME,DESCRIPTION,IMAGE_UPLOAD,PRICE,STOCK_QTD,STATUS,SUPPLIER_ID")] Product product)
         {
             if (id != product.ID || !ProductExists(id))
                 return NotFound();
@@ -93,9 +100,19 @@ namespace DmStore.Areas.Admin.Controllers
                 {
                     if (productUpdate != null)
                     {
+                        if (product.IMAGE_UPLOAD != null)
+                        {
+                            var imgPrefixo = Guid.NewGuid() + "_";
+                            if (!await UploadArquivo(product.IMAGE_UPLOAD, imgPrefixo))
+                            {
+                                return View(product);
+                            }
+
+                            productUpdate.IMAGE_URI = imgPrefixo + productUpdate.IMAGE_UPLOAD.FileName;
+                        }
+
                         productUpdate.NAME = product.NAME;
                         productUpdate.DESCRIPTION = product.DESCRIPTION;
-                        productUpdate.IMAGE_URI = product.IMAGE_URI;
                         productUpdate.PRICE = product.PRICE;
                         productUpdate.STOCK_QTD = product.STOCK_QTD;
                         productUpdate.UPDATE_REGISTER = DateTime.Now;
@@ -167,6 +184,26 @@ namespace DmStore.Areas.Admin.Controllers
         private bool ProductExists(string id)
         {
             return _context.PRODUCTS.Any(e => e.ID == id);
+        }
+
+        private async Task<bool> UploadArquivo(IFormFile arquivo, string imgPrefixo)
+        {
+            if (arquivo.Length <= 0) return false;
+
+            var path = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/images", imgPrefixo + arquivo.FileName);
+
+            if (System.IO.File.Exists(path))
+            {
+                ModelState.AddModelError(string.Empty, "Já existe um arquivo com este nome!");
+                return false;
+            }
+
+            using (var stream = new FileStream(path, FileMode.Create))
+            {
+                await arquivo.CopyToAsync(stream);
+            }
+
+            return true;
         }
     }
 }

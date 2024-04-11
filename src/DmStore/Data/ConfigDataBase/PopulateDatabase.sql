@@ -22,7 +22,7 @@ COMMIT;
 ---- PRODUTOS
 
 INSERT INTO PRODUCTS(ID,SUPPLIER_ID,NAME,DESCRIPTION,IMAGE_URI,PRICE,STOCK_QTD,SOLD_QTD,STATUS) 
-VALUES('66be4d75-a8a9-4087-b264-be11bae37d9e','36021c0a-88c0-47f7-b09d-99814530e1de','Contra Baixo Fender 013 6860 Deluxe Active Jazz Bass V 341','O contrabaixo Fender Deluxe Active Jazz Bass V tem a sonoridade clássica do Jazz Basss, porém com um mix de características modernas, como o eq. ativo de 3 bandas. Com um par de captadores Noiseless Jazz Bass V e controle de pan, você consegue uma enorme gama de sonoridades. O eq de 3 bandas tem agudo ( + /- 10 db em 8kHz), médio ( + 10dB, -15dB em 500Hz) e grave ( + /- 12db em 40Hz), além disso acompanha um luxuoso Deluxe Gig Bag.','ImagemTeste',11000,21,0,1);
+VALUES('66be4d75-a8a9-4087-b264-be11bae37d9e','36021c0a-88c0-47f7-b09d-99814530e1de','Contra Baixo Fender 013 6860 Deluxe Active Jazz Bass V 341','O contrabaixo Fender Deluxe Active Jazz Bass V tem a sonoridade clássica do Jazz Basss, porém com um mix de características modernas, como o eq. ativo de 3 bandas. Com um par de captadores Noiseless Jazz Bass V e controle de pan, você consegue uma enorme gama de sonoridades. O eq de 3 bandas tem agudo ( + /- 10 db em 8kHz), médio ( + 10dB, -15dB em 500Hz) e grave ( + /- 12db em 40Hz), além disso acompanha um luxuoso Deluxe Gig Bag.','f7a42f39-349e-4cf2-988d-1c1e2b3d886e_Contra-Baixo-Fender-Deluxe.webp',11000,21,0,1);
 
 COMMIT;
 
