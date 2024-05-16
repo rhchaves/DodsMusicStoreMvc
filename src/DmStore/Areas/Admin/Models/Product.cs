@@ -52,7 +52,7 @@ namespace DmStore.Areas.Admin.Models
         [Required]
         public string SUPPLIER_ID { get; set; }
 
-        [ForeignKey("SUPPLIER_ID")] // Indica que essa propriedade se refere à chave estrangeira SUPPLIER_ID
+        [ForeignKey("SUPPLIER_ID")]
         public Supplier? SUPPLIER { get; set; }
     }
 }

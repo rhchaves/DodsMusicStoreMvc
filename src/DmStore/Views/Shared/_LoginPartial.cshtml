@@ -3,12 +3,12 @@
 @using System.Security.Claims
 @inject SignInManager<IdentityUser> SignInManager
 @inject UserManager<IdentityUser> UserManager
-@inject ClientService _clientService
+@inject IClienteServico _clientService
 
 <ul class="navbar-nav">
 @if (SignInManager.IsSignedIn(User))
 {
-    var client = await _clientService.GetClient(User.FindFirstValue(ClaimTypes.NameIdentifier));
+        var client = await _clientService.GetClientByIdAsync(User.FindFirstValue(ClaimTypes.NameIdentifier));
 
     @if (User.Identity.IsAuthenticated && client == null)
     {

@@ -1,8 +1,11 @@
 using DmStore.Areas.Admin.Models;
 using DmStore.Areas.Admin.Models.Validations;
+using DmStore.Areas.Admin.Repositories;
+using DmStore.Areas.Admin.Services;
 using DmStore.Data;
 using DmStore.Models;
 using DmStore.Models.Validations;
+using DmStore.Repositories;
 using DmStore.Services;
 using FluentValidation;
 using Microsoft.AspNetCore.Identity;
@@ -28,14 +31,21 @@ builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.Requ
                 .AddEntityFrameworkStores<DmStoreDbContext>()
                 .AddDefaultTokenProviders();
 
-// Registro dos Serviços
-builder.Services.AddScoped<ClientService, ClientService>();
-
 // Registro de Validações
 builder.Services.AddScoped<IValidator<Client>, ClientValidation>()
                 .AddScoped<IValidator<Product>, ProductValidation>()
                 .AddScoped<IValidator<Supplier>, SupplierValidation>();
 
+// Registro dos Repositorios
+builder.Services.AddScoped<IClientRepository, ClientRepository>()
+                .AddScoped<IProductRepository, ProductRepository>()
+                .AddScoped<ISupplierRepository, SupplierRepository>();
+
+// Registro dos Serviços
+builder.Services.AddScoped<IProductService, ProductService>()
+                .AddScoped<ISupplierService, SupplierService>();
+
+builder.Services.AddScoped<IClienteServico, ClienteServico>();
 
 var app = builder.Build();
 

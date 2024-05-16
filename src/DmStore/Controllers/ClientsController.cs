@@ -1,22 +1,18 @@
-﻿using DmStore.Data;
-using DmStore.Models;
-using Microsoft.AspNetCore.Identity;
+﻿using DmStore.Models;
+using DmStore.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using System.Security.Claims;
 
-namespace DmStore.Areas.Admin.Controllers
+namespace DmStore.Controllers
 {
     [Route("cliente")]
     public class ClientsController : Controller
     {
-        private readonly DmStoreDbContext _context;
-        private readonly UserManager<IdentityUser> _userManager;
+        private readonly IClienteServico _clienteService;
 
-        public ClientsController(DmStoreDbContext context, UserManager<IdentityUser> userManager)
+        public ClientsController(IClienteServico clienteService)
         {
-            _context = context;
-            _userManager = userManager;
+            _clienteService = clienteService;
         }
 
         [Route("completar-cadastro")]
@@ -29,21 +25,9 @@ namespace DmStore.Areas.Admin.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("ID,NAME,CPF,PHONE_NUMBER,ADDRESS,ADDRESS_NUMBER,COMPLEMENT,ZIP_CODE,NEIGHBORHOOD,CITY,STATE,NORMALIZED_NAME")] Client client)
         {
-            IdentityUser loggedUser = await _context.Users.FindAsync(User.FindFirstValue(ClaimTypes.NameIdentifier));
-
-            if (loggedUser == null) return NotFound();
-
             if (ModelState.IsValid)
             {
-                client.ID = loggedUser.Id;
-                client.NORMALIZED_NAME = client.NAME.ToUpper();
-                client.STATUS = true;
-                loggedUser.PhoneNumber = client.PHONE_NUMBER;
-                loggedUser.PhoneNumberConfirmed = true;
-
-                await _userManager.UpdateAsync(loggedUser);
-                _context.CLIENTS.Add(client);
-                await _context.SaveChangesAsync();
+                await _clienteService.CreatNewClientAsync(client);
                 return RedirectToAction("Index", "Home");
             }
             return View(client);
@@ -52,40 +36,32 @@ namespace DmStore.Areas.Admin.Controllers
         [Route("editar/{id}")]
         public async Task<IActionResult> Edit(string id)
         {
-            if (!ClientExists(id))
+            if (!await _clienteService.ClientExistsAsync(id))
                 return NotFound();
 
-            var client = await _context.CLIENTS.FindAsync(id);
-
-            return View(client);
+            return View(await _clienteService.GetClientByIdAsync(id));
         }
 
         [HttpPost("editar/{id}")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(string id, [Bind("ID,NAME,CPF,PHONE_NUMBER,ADDRESS,ADDRESS_NUMBER,COMPLEMENT,ZIP_CODE,NEIGHBORHOOD,CITY,STATE,NORMALIZED_NAME")] Client client)
         {
-            if (id != client.ID || !ClientExists(client.ID))
+            if (id != client.ID || !await _clienteService.ClientExistsAsync(client.ID))
                 return NotFound();
 
             if (ModelState.IsValid)
             {
                 try
                 {
-                    _context.Update(client);
-                    await _context.SaveChangesAsync();
+                    Client clientUpdate = await _clienteService.EditClientAsync(client);
+                    return RedirectToAction("Index", "Home");
                 }
                 catch (DbUpdateConcurrencyException ex)
                 {
                     throw new Exception(ex.Message);
                 }
-                return RedirectToAction("Index", "Home");
             }
             return View(client);
-        }
-
-        private bool ClientExists(string id)
-        {
-            return _context.CLIENTS.Any(e => e.ID == id);
         }
     }
 }

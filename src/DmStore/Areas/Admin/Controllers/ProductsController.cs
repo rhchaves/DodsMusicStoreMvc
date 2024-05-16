@@ -1,5 +1,5 @@
 ﻿using DmStore.Areas.Admin.Models;
-using DmStore.Data;
+using DmStore.Areas.Admin.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
@@ -10,38 +10,31 @@ namespace DmStore.Areas.Admin.Controllers
     [Route("produto")]
     public class ProductsController : Controller
     {
-        private readonly DmStoreDbContext _context;
+        private readonly IProductService _productService;
 
-        public ProductsController(DmStoreDbContext context)
+        public ProductsController(IProductService productService)
         {
-            _context = context;
+            _productService = productService;
         }
 
         public async Task<IActionResult> Index()
         {
-            var dmStoreDbContext = _context.PRODUCTS.Include(p => p.SUPPLIER);
-            return View(await dmStoreDbContext.ToListAsync());
-
-            //return View(await _context.PRODUCTS. .ToListAsync());
+            return View(await _productService.GetListProductAsync());
         }
 
         [Route("detalhes/{id}")]
         public async Task<IActionResult> Details(string id)
         {
-            if (!ProductExists(id))
+            if (!await _productService.ProductExistsAsync(id))
                 return NotFound();
 
-            Product product = await _context.PRODUCTS.FindAsync(id);
-            Supplier supplier = await _context.SUPPLIERS.FindAsync(product.SUPPLIER_ID);
-            product.SUPPLIER = supplier;
-
-            return View(product);
+            return View(await _productService.GetProductByIdAsync(id));
         }
 
         [Route("novo")]
         public IActionResult Create()
         {
-            var activeSuppliers = _context.SUPPLIERS.Where(s => s.STATUS == true);
+            var activeSuppliers = _productService.GetActiveSuppliersAsync().Result;
 
             ViewData["Supplier"] = new SelectList(activeSuppliers, "ID", "NAME");
             return View();
@@ -51,24 +44,17 @@ namespace DmStore.Areas.Admin.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("NAME,DESCRIPTION,IMAGE_UPLOAD,PRICE,STOCK_QTD,STATUS,SUPPLIER_ID")] Product product)
         {
-            if (ModelState.IsValid)
+            try
             {
-                Supplier supplier = await _context.SUPPLIERS.FindAsync(product.SUPPLIER_ID);
-
-                var imgPrefixo = Guid.NewGuid() + "_";
-                if (!await UploadArquivo(product.IMAGE_UPLOAD, imgPrefixo))
+                if (ModelState.IsValid)
                 {
-                    return View(product);
+                    await _productService.CreatNewProductAsync(product);
+                    return RedirectToAction(nameof(Index));
                 }
-                product.IMAGE_URI = imgPrefixo + product.IMAGE_UPLOAD.FileName;
-
-                product.SUPPLIER = supplier;
-                product.CREATE_REGISTER = DateTime.Now;
-                product.UPDATE_REGISTER = DateTime.Now;
-                product.UPDATE_STATUS = DateTime.Now;
-                _context.Add(product);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+            }
+            catch (DbUpdateConcurrencyException ex)
+            {
+                throw new Exception(ex.Message);
             }
             return View(product);
         }
@@ -76,103 +62,53 @@ namespace DmStore.Areas.Admin.Controllers
         [Route("editar/{id}")]
         public async Task<IActionResult> Edit(string id)
         {
-            if (!ProductExists(id))
+            if (!await _productService.ProductExistsAsync(id))
                 return NotFound();
 
-            Product product = await _context.PRODUCTS.FindAsync(id);
-            Supplier supplier = await _context.SUPPLIERS.FindAsync(product.SUPPLIER_ID);
-            product.SUPPLIER = supplier;
-
-            return View(product);
+            return View(await _productService.GetProductByIdAsync(id));
         }
 
         [HttpPost("editar/{id}")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(string id, [Bind("ID,NAME,DESCRIPTION,IMAGE_UPLOAD,PRICE,STOCK_QTD,STATUS,SUPPLIER_ID")] Product product)
         {
-            if (id != product.ID || !ProductExists(id))
+            if (id != product.ID || !await _productService.ProductExistsAsync(id))
                 return NotFound();
 
-            Product productUpdate = await _context.PRODUCTS.FindAsync(id);
             if (ModelState.IsValid)
             {
                 try
                 {
-                    if (productUpdate != null)
-                    {
-                        if (product.IMAGE_UPLOAD != null)
-                        {
-                            var imgPrefixo = Guid.NewGuid() + "_";
-                            if (!await UploadArquivo(product.IMAGE_UPLOAD, imgPrefixo))
-                            {
-                                return View(product);
-                            }
-
-                            productUpdate.IMAGE_URI = imgPrefixo + productUpdate.IMAGE_UPLOAD.FileName;
-                        }
-
-                        productUpdate.NAME = product.NAME;
-                        productUpdate.DESCRIPTION = product.DESCRIPTION;
-                        productUpdate.PRICE = product.PRICE;
-                        productUpdate.STOCK_QTD = product.STOCK_QTD;
-                        productUpdate.UPDATE_REGISTER = DateTime.Now;
-
-                        _context.Update(productUpdate);
-                        await _context.SaveChangesAsync();
-                    }
+                    Product productUpdate = await _productService.EditProductAsync(product);
+                    return RedirectToAction(nameof(Index));
                 }
                 catch (DbUpdateConcurrencyException ex)
                 {
                     throw new Exception(ex.Message);
                 }
-                return RedirectToAction(nameof(Index));
             }
-            return View(productUpdate);
+            return View(product);
         }
 
         [Route("excluir/{id}")]
         public async Task<IActionResult> Delete(string id)
         {
-            if (!ProductExists(id))
+            if (!await _productService.ProductExistsAsync(id))
                 return NotFound();
 
-            Product product = await _context.PRODUCTS.FindAsync(id);
-            Supplier supplier = await _context.SUPPLIERS.FindAsync(product.SUPPLIER_ID);
-            product.SUPPLIER = supplier;
-
-            return View(product);
+            return View(await _productService.GetProductByIdAsync(id));
         }
 
         [HttpPost("excluir/{id}"), ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(string id)
         {
-            if (!ProductExists(id))
+            if (!await _productService.ProductExistsAsync(id))
                 return NotFound();
-
-            _context.PRODUCTS.Remove(await _context.PRODUCTS.FindAsync(id));
-            await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
-        }
-
-        [Route("status/{id}")]
-        public async Task<IActionResult> ActivateDeactivate(string id)
-        {
-            if (!ProductExists(id))
-                return NotFound();
-
-            Product product = await _context.PRODUCTS.FindAsync(id);
 
             try
             {
-                if (product != null)
-                {
-                    product.STATUS = !product.STATUS;
-                    product.UPDATE_STATUS = DateTime.Now;
-
-                    _context.Update(product);
-                    await _context.SaveChangesAsync();
-                }
+                _productService.DeleteProduct(id);
             }
             catch (DbUpdateConcurrencyException ex)
             {
@@ -181,29 +117,14 @@ namespace DmStore.Areas.Admin.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-        private bool ProductExists(string id)
+        [Route("status/{id}")]
+        public async Task<IActionResult> ActivateDeactivate(string id)
         {
-            return _context.PRODUCTS.Any(e => e.ID == id);
-        }
+            if (!await _productService.ProductExistsAsync(id))
+                return NotFound();
 
-        private async Task<bool> UploadArquivo(IFormFile arquivo, string imgPrefixo)
-        {
-            if (arquivo.Length <= 0) return false;
-
-            var path = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/images", imgPrefixo + arquivo.FileName);
-
-            if (System.IO.File.Exists(path))
-            {
-                ModelState.AddModelError(string.Empty, "Já existe um arquivo com este nome!");
-                return false;
-            }
-
-            using (var stream = new FileStream(path, FileMode.Create))
-            {
-                await arquivo.CopyToAsync(stream);
-            }
-
-            return true;
+            _productService.ActivateDeactivate(id);
+            return RedirectToAction(nameof(Index));
         }
     }
 }
