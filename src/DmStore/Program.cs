@@ -38,11 +38,13 @@ builder.Services.AddScoped<IValidator<Client>, ClientValidation>()
 
 // Registro dos Repositorios
 builder.Services.AddScoped<IClientRepository, ClientRepository>()
+                .AddScoped<IHomeRepository, HomeRepository>()
                 .AddScoped<IProductRepository, ProductRepository>()
                 .AddScoped<ISupplierRepository, SupplierRepository>();
 
 // Registro dos Serviços
 builder.Services.AddScoped<IProductService, ProductService>()
+                .AddScoped<IHomeService, HomeService>()
                 .AddScoped<ISupplierService, SupplierService>();
 
 builder.Services.AddScoped<IClienteServico, ClienteServico>();

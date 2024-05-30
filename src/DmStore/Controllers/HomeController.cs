@@ -1,4 +1,5 @@
 using DmStore.Models;
+using DmStore.Services;
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
 
@@ -6,13 +7,15 @@ namespace DmStore.Controllers
 {
     public class HomeController : Controller
     {
-        public HomeController()
+        private readonly IHomeService _homeService;
+        public HomeController(IHomeService homeService)
         {
+            _homeService = homeService;
         }
 
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
-            return View();
+            return View(await _homeService.ListAllProductAsync());
         }
 
         public IActionResult Privacy()
