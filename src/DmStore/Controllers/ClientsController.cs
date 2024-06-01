@@ -8,11 +8,11 @@ namespace DmStore.Controllers
     [Route("cliente")]
     public class ClientsController : Controller
     {
-        private readonly IClienteServico _clienteService;
+        private readonly IClientUserService _clientUserService;
 
-        public ClientsController(IClienteServico clienteService)
+        public ClientsController(IClientUserService clientUserService)
         {
-            _clienteService = clienteService;
+            _clientUserService = clientUserService;
         }
 
         [Route("completar-cadastro")]
@@ -27,7 +27,7 @@ namespace DmStore.Controllers
         {
             if (ModelState.IsValid)
             {
-                await _clienteService.CreatNewClientAsync(client);
+                await _clientUserService.CreatNewClientAsync(client);
                 return RedirectToAction("Index", "Home");
             }
             return View(client);
@@ -36,24 +36,24 @@ namespace DmStore.Controllers
         [Route("editar/{id}")]
         public async Task<IActionResult> Edit(string id)
         {
-            if (!await _clienteService.ClientExistsAsync(id))
+            if (!await _clientUserService.ClientExistsAsync(id))
                 return NotFound();
 
-            return View(await _clienteService.GetClientByIdAsync(id));
+            return View(await _clientUserService.GetClientByIdAsync(id));
         }
 
         [HttpPost("editar/{id}")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(string id, [Bind("ID,NAME,CPF,PHONE_NUMBER,ADDRESS,ADDRESS_NUMBER,COMPLEMENT,ZIP_CODE,NEIGHBORHOOD,CITY,STATE,NORMALIZED_NAME")] Client client)
         {
-            if (id != client.ID || !await _clienteService.ClientExistsAsync(client.ID))
+            if (id != client.ID || !await _clientUserService.ClientExistsAsync(client.ID))
                 return NotFound();
 
             if (ModelState.IsValid)
             {
                 try
                 {
-                    Client clientUpdate = await _clienteService.EditClientAsync(client);
+                    Client clientUpdate = await _clientUserService.EditClientAsync(client);
                     return RedirectToAction("Index", "Home");
                 }
                 catch (DbUpdateConcurrencyException ex)

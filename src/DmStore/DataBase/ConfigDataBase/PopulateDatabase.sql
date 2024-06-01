@@ -42,6 +42,9 @@ VALUES('d6a7f6b5-5ab6-4a06-8f8e-85e9d8cd4122','3bd402a2-993b-403d-aa67-4af86c9df
 INSERT INTO PRODUCTS(ID,SUPPLIER_ID,NAME,DESCRIPTION,IMAGE_URI,PRICE,STOCK_QTD,SOLD_QTD,STATUS) 
 VALUES('2d55bfc5-09f6-47e3-8c35-4a0af06fa8b4','36021c0a-88c0-47f7-b09d-99814530e1de','Baixo Square','Baixo Square 5 Cordas Natural Jazz Bass','28901bbb-bd8e-425e-93db-d57b12eba1cb_baixo-square-natural.webp',4000,9,0,1);
 
+INSERT INTO PRODUCTS(ID,SUPPLIER_ID,NAME,DESCRIPTION,IMAGE_URI,PRICE,STOCK_QTD,SOLD_QTD,STATUS) 
+VALUES('5dde764b-e9f5-4e64-9545-25cf1d36a0a5','01565420-d42b-4040-a525-11e9766e3d25','Bateria DW Collectors Pure Maple Pale Blue Oyster 22",8",10",12",14",16" (Shell Pack) Made in USA','Bateria DW Original Americana, Nova nunca saiu de casa! Somente para Venda. Dispenso Curiosos e perus! Qualquer dúvida é só me perguntar. Vídeos e o som da bateria no meu YT canal.à venda somente Tambores;COMPOSIÇÃO DO KIT* Tons: 8x10", 10x10" e 12x9"* Surdos: 14x14" e 16x16" ambos de chão com pezinhos* Bumbo: 22x18"* Clamp holders inclusos, 1 single e 1 duplo e uma estante de prato original DW.','af231c4c-d3c9-48da-aae1-87718482510c_Bateria-DW-Collectors-Pale-Blue-Oyster.jpg',4000,9,0,1);
+
 COMMIT;
 
 ---- USUARIOS

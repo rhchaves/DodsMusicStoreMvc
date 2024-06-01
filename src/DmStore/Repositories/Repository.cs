@@ -1,4 +1,5 @@
 ﻿using DmStore.Data;
+using DmStore.Models;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
 
@@ -6,62 +7,70 @@ namespace DmStore.Repositories
 {
     public interface IRepository<T>
     {
-        Task<List<T>> GetListItemAsync();
-        Task<T> GetItemByIdAsync(Expression<Func<T, bool>> predicate);
+        Task<List<T>> GetListAllItensAsync();
+        Task<T> GetItemByIdAsync(string id);
+        Task<IEnumerable<T>> GetItemByDescriptionAsync(Expression<Func<T, bool>> predicate);
+        Task<bool> ItemExistsAsync(string id);
         Task<T> AddItemAsync(T entity);
-        void UpdateItem(T entity);
-        void DeleteItem(T entity);
-        Task<bool> ItemExistsAsync(Expression<Func<T, bool>> predicate);
-        void CommitAsync();
+        Task UpdateItem(T entity);
+        void RemoveItem(T entity);
+        Task<int> CommitAsync();
         void Dispose();
     }
 
-    public class Repository<T> : IRepository<T> where T : class
+    public class Repository<T> : IRepository<T> where T : Entity, new()
     {
-        protected DmStoreDbContext _context;
+        protected readonly DmStoreDbContext _context;
+        protected readonly DbSet<T> _dbSetContext;
 
         public Repository(DmStoreDbContext context)
         {
             _context = context;
+            _dbSetContext = context.Set<T>();
         }
 
-        public async Task<List<T>> GetListItemAsync()
+        public virtual async Task<List<T>> GetListAllItensAsync()
         {
-            return await _context.Set<T>().ToListAsync();
+            return await _dbSetContext.ToListAsync();
         }
 
-        public async Task<T> GetItemByIdAsync(Expression<Func<T, bool>> predicate)
+        public virtual async Task<T> GetItemByIdAsync(string id)
         {
-            return await _context.Set<T>().SingleOrDefaultAsync(predicate);
+            return await _dbSetContext.FindAsync(id);
         }
 
-        public async Task<T> AddItemAsync(T entity)
+        public virtual async Task<IEnumerable<T>> GetItemByDescriptionAsync(Expression<Func<T, bool>> predicate)
         {
-            await _context.Set<T>().AddAsync(entity);
-            CommitAsync();
+            return await _dbSetContext.Where(predicate).AsNoTracking().ToListAsync();
+        }
+
+        public virtual async Task<bool> ItemExistsAsync(string id)
+        {
+            return await _dbSetContext.AnyAsync(x => x.ID == id);
+        }
+
+        public virtual async Task<T> AddItemAsync(T entity)
+        {
+            await _dbSetContext.AddAsync(entity);
+            await CommitAsync();
             return entity;
         }
 
-        public void DeleteItem(T entity)
-        {
-            _context.Set<T>().Remove(entity);
-            CommitAsync();
-        }
-
-        public void UpdateItem(T entity)
+        public virtual async Task UpdateItem(T entity)
         {
             _context.Entry(entity).State = EntityState.Modified;
-            CommitAsync();
+            await CommitAsync();
         }
 
-        public async Task<bool> ItemExistsAsync(Expression<Func<T, bool>> predicate)
+        public virtual async void RemoveItem(T entity)
         {
-            return await _context.Set<T>().AnyAsync(predicate);
+            _dbSetContext.Remove(entity);
+            await CommitAsync();
         }
 
-        public async void CommitAsync()
+        public async Task<int> CommitAsync()
         {
-            await _context.SaveChangesAsync();
+            return await _context.SaveChangesAsync();
         }
 
         public void Dispose()

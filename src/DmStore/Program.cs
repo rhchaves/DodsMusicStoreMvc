@@ -37,17 +37,16 @@ builder.Services.AddScoped<IValidator<Client>, ClientValidation>()
                 .AddScoped<IValidator<Supplier>, SupplierValidation>();
 
 // Registro dos Repositorios
-builder.Services.AddScoped<IClientRepository, ClientRepository>()
+builder.Services.AddScoped<IClientUserRepository, ClientUserRepository>()
                 .AddScoped<IHomeRepository, HomeRepository>()
                 .AddScoped<IProductRepository, ProductRepository>()
                 .AddScoped<ISupplierRepository, SupplierRepository>();
 
 // Registro dos Serviços
-builder.Services.AddScoped<IProductService, ProductService>()
+builder.Services.AddScoped<IClientUserService, ClientUserService>()
+                .AddScoped<IProductService, ProductService>()
                 .AddScoped<IHomeService, HomeService>()
                 .AddScoped<ISupplierService, SupplierService>();
-
-builder.Services.AddScoped<IClienteServico, ClienteServico>();
 
 var app = builder.Build();
 

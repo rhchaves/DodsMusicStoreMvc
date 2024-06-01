@@ -5,37 +5,37 @@ using Microsoft.EntityFrameworkCore;
 
 namespace DmStore.Services
 {
-    public interface IClienteServico
+    public interface IClientUserService
     {
         Task<bool> ClientExistsAsync(string clientId);
         Task<Client> GetClientByIdAsync(string clientId);
         Task<Client> CreatNewClientAsync(Client client);
         Task<Client> EditClientAsync(Client client);
     }
-    public class ClienteServico : IClienteServico
+    public class ClientUserService : IClientUserService
     {
-        private readonly IClientRepository _clientRepository;
+        private readonly IClientUserRepository _clientUserRepository;
         private readonly UserManager<IdentityUser> _userManager;
 
-        public ClienteServico(IClientRepository clientRepository, UserManager<IdentityUser> userManager)
+        public ClientUserService(IClientUserRepository clientUserRepository, UserManager<IdentityUser> userManager)
         {
-            _clientRepository = clientRepository;
+            _clientUserRepository = clientUserRepository;
             _userManager = userManager;
         }
 
         public async Task<bool> ClientExistsAsync(string clientId)
         {
-            return await _clientRepository.ClientExistsAsync(clientId);
+            return await _clientUserRepository.ItemExistsAsync(clientId);
         }
 
         public async Task<Client> GetClientByIdAsync(string clientId)
         {
-            return await _clientRepository.GetClientByIdAsync(clientId);
+            return await _clientUserRepository.GetItemByIdAsync(clientId);
         }
 
         public async Task<IdentityUser> GetIdentityClient(string clientId)
         {
-            return await _clientRepository.GetIdentityClient(clientId);
+            return await _clientUserRepository.GetIdentityClient(clientId);
         }
 
         public async Task<Client> CreatNewClientAsync(Client client)
@@ -53,7 +53,7 @@ namespace DmStore.Services
 
                 await _userManager.UpdateAsync(loggedUser);
 
-                return await _clientRepository.CreatNewClientAsync(client);
+                return await _clientUserRepository.AddItemAsync(client);
             }
             catch (DbUpdateConcurrencyException ex)
             {
@@ -74,7 +74,8 @@ namespace DmStore.Services
                 loggedUser.PhoneNumberConfirmed = true;
 
                 await _userManager.UpdateAsync(loggedUser);
-                return _clientRepository.EditClient(client);
+                await _clientUserRepository.UpdateItem(client);
+                return  client;
             }
             catch (DbUpdateConcurrencyException ex)
             {

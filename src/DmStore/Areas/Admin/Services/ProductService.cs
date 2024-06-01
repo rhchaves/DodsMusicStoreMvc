@@ -27,17 +27,17 @@ namespace DmStore.Areas.Admin.Services
 
         public async Task<bool> ProductExistsAsync(string productId)
         {
-            return await _productRepository.ProductExistsAsync(productId);
+            return await _productRepository.ItemExistsAsync(productId);
         }
 
         public async Task<List<Product>> GetListProductAsync()
         {
-            return await _productRepository.GetListProductAsync();
+            return await _productRepository.GetListAllItensAsync();
         }
 
         public async Task<Product> GetProductByIdAsync(string productId)
         {
-            Product product = await _productRepository.GetProductByIdAsync(productId);
+            Product product = await _productRepository.GetItemByIdAsync(productId);
             product.SUPPLIER = await _productRepository.GetSupplierByIdAsync(product.SUPPLIER_ID);
             return product;
         }
@@ -60,7 +60,7 @@ namespace DmStore.Areas.Admin.Services
             product.CREATE_REGISTER = DateTime.Now;
             product.UPDATE_REGISTER = DateTime.Now;
             product.UPDATE_STATUS = DateTime.Now;
-            return await _productRepository.CreatNewProductAsync(product);
+            return await _productRepository.AddItemAsync(product);
         }
 
         public async Task<Product> EditProductAsync(Product product)
@@ -87,7 +87,7 @@ namespace DmStore.Areas.Admin.Services
                     productUpdate.STOCK_QTD = product.STOCK_QTD;
                     productUpdate.UPDATE_REGISTER = DateTime.Now;
 
-                    _productRepository.EditProduct(productUpdate);
+                    await _productRepository.UpdateItem(productUpdate);
                 }
                 
                 return product;
@@ -102,7 +102,7 @@ namespace DmStore.Areas.Admin.Services
         {
             try
             {
-                _productRepository.DeleteProduct(await GetProductByIdAsync(id));
+                _productRepository.RemoveItem(await GetProductByIdAsync(id));
             }
             catch (DbUpdateConcurrencyException ex)
             {
@@ -142,7 +142,7 @@ namespace DmStore.Areas.Admin.Services
                     product.STATUS = !product.STATUS;
                     product.UPDATE_STATUS = DateTime.Now;
 
-                    _productRepository.EditProduct(product);
+                    await _productRepository.UpdateItem(product);
                 }
             }
             catch (DbUpdateConcurrencyException ex)

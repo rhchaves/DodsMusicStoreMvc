@@ -26,17 +26,17 @@ namespace DmStore.Areas.Admin.Services
 
         public async Task<bool> SupplierExistsAsync(string supplierId)
         {
-            return await _supplierRepository.SupplierExistsAsync(supplierId);
+            return await _supplierRepository.ItemExistsAsync(supplierId);
         }
 
         public async Task<List<Supplier>> GetListSupplierAsync()
         {
-            return await _supplierRepository.GetListSupplierAsync();
+            return await _supplierRepository.GetListAllItensAsync();
         }
 
         public async Task<Supplier> GetSupplierByIdAsync(string id)
         {
-            return await _supplierRepository.GetSupplierByIdAsync(id);
+            return await _supplierRepository.GetItemByIdAsync(id);
         }
 
         public async Task<Supplier> CreateNewSupplierAsync(Supplier supplier)
@@ -45,7 +45,7 @@ namespace DmStore.Areas.Admin.Services
             supplier.UPDATE_REGISTER = DateTime.Now;
             supplier.UPDATE_STATUS = DateTime.Now;
 
-            return await _supplierRepository.CreatNewSupplierAsync(supplier);
+            return await _supplierRepository.AddItemAsync(supplier);
         }
 
         public async Task<Supplier> EditSupplierAsync(Supplier supplier)
@@ -65,7 +65,7 @@ namespace DmStore.Areas.Admin.Services
                     supplierUpdate.STATE = supplier.STATE;
                     supplierUpdate.UPDATE_REGISTER = DateTime.Now;
 
-                    _supplierRepository.EditSupplier(supplierUpdate);
+                    await _supplierRepository.UpdateItem(supplierUpdate);
                 }
                 return supplier;
             }
@@ -79,7 +79,7 @@ namespace DmStore.Areas.Admin.Services
         {
             try
             {
-                _supplierRepository.DeleteSupplier(await GetSupplierByIdAsync(id));
+                _supplierRepository.RemoveItem(await GetSupplierByIdAsync(id));
             }
             catch (DbUpdateConcurrencyException ex)
             {
@@ -98,7 +98,7 @@ namespace DmStore.Areas.Admin.Services
                     supplier.STATUS = !supplier.STATUS;
                     supplier.UPDATE_STATUS = DateTime.Now;
 
-                    _supplierRepository.EditSupplier(supplier);
+                    await _supplierRepository.UpdateItem(supplier);
                 }
             }
             catch (DbUpdateConcurrencyException ex)
